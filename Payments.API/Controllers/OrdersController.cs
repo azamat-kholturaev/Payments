@@ -1,19 +1,21 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Payments.Application.Common.Exceptions;
 using Payments.Application.Orders.Commands;
 using Payments.Application.Orders.Queries;
 using Payments.Application.Payments.Commands;
 using Payments.Application.Payments.Queries;
 using Payments.Contracts;
-using Payments.Domain.Common;
 
 namespace Payments.API.Controllers
 {
-    [ApiController]
-    [Route("api/orders")]
+   
     [Authorize]
+    [ApiController]
+    [Route("api/[controller]")]
+    [EnableRateLimiting("payments-strict")]
     public sealed class OrdersController(IMediator mediator) : ControllerBase
     {
         [HttpPost]
