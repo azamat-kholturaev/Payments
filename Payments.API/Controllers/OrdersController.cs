@@ -15,7 +15,6 @@ namespace Payments.API.Controllers
     [Authorize]
     [ApiController]
     [Route("api/[controller]")]
-    [EnableRateLimiting("payments-strict")]
     public sealed class OrdersController(IMediator mediator) : ControllerBase
     {
         [HttpPost]

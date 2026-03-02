@@ -1,15 +1,17 @@
 ﻿using MediatR;
 using Payments.Application.Common.Exceptions;
 using Payments.Application.Common.Interfaces;
+using Payments.Application.Orders.Queries;
 using Payments.Domain.Entities;
 
 namespace Payments.Application.Payments.Queries
 {
-    public sealed class ListPaymentsByOrderQueryHandler(IReadRepository<Order> orders, IPaymentsWriteRepository payments,
-                                                        ICurrentUserProvider currentUser) : IRequestHandler<ListPaymentsByOrderQuery,
-                                                            IReadOnlyList<PaymentListItemDto>>
+    public sealed class ListPaymentsByOrderQueryHandler(IReadRepository<Order> orders,
+                                                        IPaymentsWriteRepository payments,
+                                                        ICurrentUserProvider currentUser)
+                                                        : IRequestHandler<ListPaymentsByOrderQuery, OrderWithPaymentsDto>
     {
-        public async Task<IReadOnlyList<PaymentListItemDto>> Handle(ListPaymentsByOrderQuery request, CancellationToken ct)
+        public async Task<OrderWithPaymentsDto> Handle(ListPaymentsByOrderQuery request, CancellationToken ct)
         {
             var order = await orders.GetByIdAsync(request.OrderId, ct)
                 ?? throw new AppException("order.not_found", "Order not found", 404);
@@ -19,17 +21,22 @@ namespace Payments.Application.Payments.Queries
             if (!owner.IsSuccess)
                 throw new AppException("order.forbidden", owner.Error.Message, 403);
 
+            var orderDto = new OrderDto(order.Id,
+                                        order.Total.Amount,
+                                        order.Total.Currency.Code,
+                                        order.Status.ToString().ToLowerInvariant());
+
             var list = await payments.GetByOrderIdAsync(order.Id, ct);
-            return [.. list
-                .OrderByDescending(x => x.CreatedAt)
-                .Select(x => new PaymentListItemDto(
-                    x.Id,
-                    x.Status.ToString().ToLowerInvariant(),
-                    x.Amount,
-                    x.Currency,
-                    x.CreatedAt,
-                    x.ProviderPaymentId,
-                    x.FailureReason))];
+
+            var paymentDtos = list.Select(p => new PaymentListItemDto(p.Id,
+                                                                      p.Status.ToString().ToLowerInvariant(),
+                                                                      p.Amount,
+                                                                      p.Currency,
+                                                                      p.CreatedAt,
+                                                                      p.ProviderPaymentId,
+                                                                      p.FailureReason)).ToList();
+
+            return new OrderWithPaymentsDto(orderDto, paymentDtos);
         }
     }
 }

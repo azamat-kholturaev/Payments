@@ -32,6 +32,7 @@ namespace Payments.Application.Payments.Commands
                 throw new AppException("order.not_payable", payable.Error.Message, 409);
 
             var paymentResult = Payment.Create(order.Id, userId, order.Total, request.IdempotencyKey);
+
             if (!paymentResult.IsSuccess)
                 throw new AppException("payment.invalid", paymentResult.Error.Message, 400);
 
@@ -40,7 +41,6 @@ namespace Payments.Application.Payments.Commands
 
             var dto = new PaymentDto(payment.Id,
                                      payment.OrderId,
-                                     payment.UserId,
                                      payment.Amount,
                                      payment.Currency,
                                      payment.Status.ToString().ToLowerInvariant(),

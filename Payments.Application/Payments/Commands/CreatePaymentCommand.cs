@@ -4,5 +4,5 @@ namespace Payments.Application.Payments.Commands
 {
     public sealed record CreatePaymentCommand(Guid OrderId, string IdempotencyKey) : ICommand<PaymentDto>;
 
-    public sealed record PaymentDto(Guid Id, Guid OrderId, Guid UserId, decimal Amount, string Currency, string Status, DateTimeOffset CreatedAt);
+    public sealed record PaymentDto(Guid Id, Guid OrderId, decimal Amount, string Currency, string Status, DateTimeOffset CreatedAt);
 }

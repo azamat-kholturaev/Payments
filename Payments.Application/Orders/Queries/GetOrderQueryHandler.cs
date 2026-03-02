@@ -17,7 +17,10 @@ namespace Payments.Application.Orders.Queries
             if (!owner.IsSuccess)
                 throw new AppException("order.forbidden", owner.Error.Message, 403);
 
-            return new OrderDto(order.Id, order.UserId, order.Total.Amount, order.Total.Currency.Code, order.Status.ToString().ToLowerInvariant());
+            return new OrderDto(order.Id,
+                                order.Total.Amount,
+                                order.Total.Currency.Code,
+                                order.Status.ToString().ToLowerInvariant());
         }
     }
 }

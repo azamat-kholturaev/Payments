@@ -1,6 +1,7 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Payments.Application.Authentication.Commands;
 using Payments.Application.Authentication.Queries;
 using Payments.Contracts;
@@ -10,6 +11,7 @@ namespace Payments.API.Controllers
     [ApiController]
     [Route("api/auth")]
     [AllowAnonymous]
+    [EnableRateLimiting("payments-strict")]
     public sealed class AuthController(IMediator mediator) : ControllerBase
     {
         [HttpPost("register")]

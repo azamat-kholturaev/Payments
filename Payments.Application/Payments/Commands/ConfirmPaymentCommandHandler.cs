@@ -42,8 +42,19 @@ namespace Payments.Application.Payments.Commands
 
             if (payment.Status == PaymentStatus.Successful)
             {
-                var already = new ConfirmPaymentResultDto(payment.Id, payment.OrderId, "successful", "paid", payment.ProviderPaymentId, payment.FailureReason);
-                await idempotencyStore.TrySaveAsync(userId, request.IdempotencyKey, scope, 200, JsonSerializer.Serialize(already), ct);
+                var already = new ConfirmPaymentResultDto(payment.Id,
+                                                          payment.OrderId,
+                                                          "successful",
+                                                          "paid",
+                                                          payment.ProviderPaymentId,
+                                                          payment.FailureReason);
+
+                await idempotencyStore.TrySaveAsync(userId,
+                                                    request.IdempotencyKey,
+                                                    scope,
+                                                    200,
+                                                    JsonSerializer.Serialize(already),
+                                                    ct);
                 return already;
             }
 
