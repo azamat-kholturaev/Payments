@@ -1,0 +1,21 @@
+﻿using Microsoft.EntityFrameworkCore;
+using Payments.Application.Common.Interfaces;
+using Payments.Domain.Entities;
+using Payments.Infrastructure.Common.Persistence;
+
+namespace Payments.Infrastructure.Repositories
+{
+    internal sealed class PaymentsWriteRepository(AppDbContext db) : IWriteRepository<Payment>
+    {
+        private readonly AppDbContext _db = db;
+
+        public Task<Payment?> GetTrackingByIdAsync(Guid id, CancellationToken ct)
+            => _db.Payments.FirstOrDefaultAsync(x => x.Id == id, ct);
+
+        public Task AddAsync(Payment entity, CancellationToken ct)
+            => _db.Payments.AddAsync(entity, ct).AsTask();
+
+        public void Remove(Payment entity)
+            => _db.Payments.Remove(entity);
+    }
+}
