@@ -81,7 +81,7 @@ namespace Payments.Infrastructure
             services.AddScoped<IReadRepository<Order>, OrdersReadRepository>();
             services.AddScoped<IOrdersWriteRepository, OrdersWriteRepository>();
             services.AddScoped<IReadRepository<Payment>, PaymentsReadRepository>();
-            services.AddScoped<IWriteRepository<Payment>, PaymentsWriteRepository>();
+            services.AddScoped<IPaymentsWriteRepository, PaymentsWriteRepository>();
             services.AddScoped<IUsersRepository, UsersRepository>();
             return services;
         }
