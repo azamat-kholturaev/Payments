@@ -2,5 +2,5 @@
 
 namespace Payments.Application.Orders.Commands
 {
-    public record CreateOrderCommand(Guid UserId, decimal Amount, string Currency) : ICommand<Guid>;
+    public record CreateOrderCommand(decimal Amount, string Currency) : ICommand<Guid>;
 }
