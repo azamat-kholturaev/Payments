@@ -27,6 +27,8 @@ builder.Services.AddOpenApi(options =>
 
 var app = builder.Build();
 
+await InfrastructureDatabaseInitializer.ApplyMigrationsAndSeedAsync(app.Services);
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
@@ -46,6 +48,8 @@ app.UseHttpsRedirection();
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.UseExceptionHandler();
 
 app.MapControllers();
 

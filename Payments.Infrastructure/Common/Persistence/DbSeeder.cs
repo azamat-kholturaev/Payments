@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Payments.Infrastructure.Common.Persistence
 {
-    public static class DbSeeder
+    internal static class DbSeeder
     {
         internal static async Task SeedAsync(AppDbContext db, CancellationToken ct)
         {

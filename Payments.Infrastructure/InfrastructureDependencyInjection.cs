@@ -110,6 +110,5 @@ namespace Payments.Infrastructure
 
             return services;
         }
-
     }
 }
