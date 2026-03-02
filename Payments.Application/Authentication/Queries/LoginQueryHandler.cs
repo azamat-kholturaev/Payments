@@ -1,5 +1,6 @@
 ﻿using Payments.Application.Common.Interfaces;
 using MediatR;
+using Payments.Application.Common.Exceptions;
 
 namespace Payments.Application.Authentication.Queries
 {
@@ -13,11 +14,12 @@ namespace Payments.Application.Authentication.Queries
             var email = request.Email.Trim().ToLowerInvariant();
 
             var user = await users.FindByEmailAsync(email, ct);
+
             if (user is null)
-                throw new ApplicationException("auth.invalid_credentials");
+                throw new AppException("auth.invalid_credentials", "Invalid credentials", 401);
 
             if (!hasher.Verify(request.Password, user.PasswordHash.Value))
-                throw new ApplicationException("auth.invalid_credentials");
+                throw new AppException("auth.invalid_credentials", "Invalid credentials", 401);
 
             return jwt.Generate(user);
         }

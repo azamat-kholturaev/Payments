@@ -1,7 +1,8 @@
-﻿using Payments.Infrastructure.Common.Persistence;
+﻿using Microsoft.EntityFrameworkCore;
 using Payments.Application.Common.Interfaces;
-using Microsoft.EntityFrameworkCore;
 using Payments.Domain.Entities;
+using Payments.Domain.ValueObjects;
+using Payments.Infrastructure.Common.Persistence;
 
 namespace Payments.Infrastructure.Repositories
 {
@@ -10,7 +11,12 @@ namespace Payments.Infrastructure.Repositories
         public Task<User?> FindByEmailAsync(string email, CancellationToken ct)
         {
             var normalized = email.Trim().ToLowerInvariant();
-            return db.Users.FirstOrDefaultAsync(x => x.Email.Value == normalized, ct);
+            var emailResult = Email.Create(normalized);
+
+            if (!emailResult.IsSuccess)
+                return Task.FromResult<User?>(null);
+
+            return db.Users.FirstOrDefaultAsync(x => x.Email == emailResult.Value!, ct);
         }
 
         public Task AddAsync(User user, CancellationToken ct)

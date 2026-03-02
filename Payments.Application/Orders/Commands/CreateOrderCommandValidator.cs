@@ -10,7 +10,7 @@ namespace Payments.Application.Orders.Commands
                 .GreaterThan(0)
                 .WithMessage("Amount must be greater than zero.");
 
-            RuleFor(x => x.Currency)
+            RuleFor(x => x.Currency.ToUpper())
                 .NotEmpty()
                 .Length(3)
                 .Matches("^[A-Z]{3}$")

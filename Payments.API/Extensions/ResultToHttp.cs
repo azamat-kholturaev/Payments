@@ -1,6 +1,6 @@
 ﻿using Payments.Domain.Common;
 
-namespace Payments.API.Extensions
+namespace Payments.API.ExceptionHandling
 {
     public static class ResultToHttp
     {

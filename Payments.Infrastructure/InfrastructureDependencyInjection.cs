@@ -65,7 +65,7 @@ namespace Payments.Infrastructure
 
         private static IServiceCollection AddCaching(this IServiceCollection services)
         {
-            services.AddMemoryCache(opt => { opt.SizeLimit = 1024; });
+            services.AddMemoryCache();
             return services;
         }
 
@@ -81,7 +81,7 @@ namespace Payments.Infrastructure
             services.AddScoped<IReadRepository<Order>, OrdersReadRepository>();
             services.AddScoped<IOrdersWriteRepository, OrdersWriteRepository>();
             services.AddScoped<IReadRepository<Payment>, PaymentsReadRepository>();
-            services.AddScoped<IWriteRepository<Payment>, PaymentsWriteRepository>();
+            services.AddScoped<IPaymentsWriteRepository, PaymentsWriteRepository>();
             services.AddScoped<IUsersRepository, UsersRepository>();
             return services;
         }

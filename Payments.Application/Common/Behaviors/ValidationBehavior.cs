@@ -13,7 +13,7 @@ namespace Payments.Application.Common.Behaviors
         public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken ct)
         {
             if (!_validators.Any())
-                return await next();
+                return await next(ct);
 
             var context = new ValidationContext<TRequest>(request);
 
