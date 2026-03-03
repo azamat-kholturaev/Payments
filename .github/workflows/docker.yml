@@ -1,0 +1,28 @@
+name: docker-compose-build
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build images
+        run: docker compose build
+
+      - name: Start containers
+        run: docker compose up -d
+
+      - name: Show status
+        run: docker compose ps
+
+      - name: Show api logs
+        run: docker logs payments-api --tail 200
+
+      - name: Shutdown
+        if: always()
+        run: docker compose down -v

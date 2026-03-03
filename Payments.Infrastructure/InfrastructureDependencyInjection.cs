@@ -18,7 +18,7 @@ namespace Payments.Infrastructure
     public static class InfrastructureDependencyInjection
     {
 
-       
+
 
 
         public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration cfg)
@@ -41,7 +41,7 @@ namespace Payments.Infrastructure
                 ?? throw new InvalidOperationException("Missing connection string: 'ConnectionString'");
 
             services.AddDbContextPool<AppDbContext>(opt =>
-                opt.UseNpgsql("Host=localhost;Port=5432;Database=payments;Username=admin;Password=secret;Pooling=true;Minimum Pool Size=10;"), poolSize: 64);
+                opt.UseNpgsql(cs), poolSize: 64);
 
             services.BuildServiceProvider().GetService<AppDbContext>()!.Database.Migrate();
 

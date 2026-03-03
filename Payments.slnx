@@ -1,4 +1,7 @@
 <Solution>
+  <Project Path="docker-compose.dcproj">
+    <Build />
+  </Project>
   <Project Path="Payments.API/Payments.API.csproj" />
   <Project Path="Payments.Application/Payments.Application.csproj" />
   <Project Path="Payments.Contracts/Payments.Contracts.csproj" Id="41ee6a0c-df58-479a-8bea-c530dfb7de1c" />
