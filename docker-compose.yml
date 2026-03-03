@@ -3,7 +3,7 @@ services:
     image: postgres:17
     container_name: payments-postgres
     environment:
-      POSTGRES_DB: payments
+      POSTGRES_DB: payments 
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: secret
     ports:
@@ -16,7 +16,7 @@ services:
       timeout: 3s
       retries: 10
 
-  api:
+  payments.api:
     build:
       context: .
       dockerfile: Payments.API/Dockerfile
@@ -28,11 +28,6 @@ services:
       ASPNETCORE_ENVIRONMENT: Development
       ASPNETCORE_URLS: http://0.0.0.0:8080
       ConnectionStrings__ConnectionString: "Host=postgres;Port=5432;Database=payments;Username=admin;Password=secret;Pooling=true;Minimum Pool Size=10;"
-      Payments__ConcurrencyMode: "for-update"
-      Jwt__Issuer: "Payments"
-      Jwt__Audience: "Payments"
-      Jwt__Secret: "q7Z8vL2hN5sF9dK3xT6uY0pQ4rW8mE1zC5bV9nX2aS6dF0gH3jK7lP1oI4uY8tR"
-      Jwt__ExpirationMinutes: "60"
     ports:
       - "8080:8080"
 

@@ -39,8 +39,8 @@ namespace Payments.API
 
         public static WebApplication UsePresentation(this WebApplication app)
         {
-            if (app.Environment.IsDevelopment())
-            {
+            //if (app.Environment.IsDevelopment())
+            //{
                 app.MapOpenApi();
 
                 app.UseSwaggerUI(o =>
@@ -50,7 +50,7 @@ namespace Payments.API
                 });
 
                 app.MapGet("/", () => Results.Redirect("/swagger"));
-            }
+           // }
 
             app.UseHttpsRedirection();
 
