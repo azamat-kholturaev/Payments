@@ -11,12 +11,12 @@ namespace Payments.Application.Payments.Commands
                                                      IOrdersWriteRepository orders,
                                                      ICurrentUserProvider currentUser,
                                                      IIdempotencyStore idempotencyStore,
-                                                     IPaymentProviderClient provider) : IRequestHandler<ConfirmPaymentCommand, ConfirmPaymentResultDto>
+                                                     IPaymentProviderClient provider)
+        : IRequestHandler<ConfirmPaymentCommand, ConfirmPaymentResultDto>
     {
         public async Task<ConfirmPaymentResultDto> Handle(ConfirmPaymentCommand request, CancellationToken ct)
         {
             var userId = currentUser.GetCurrentUser();
-
             var scope = $"payments:confirm:{request.PaymentId}";
 
             var replay = await idempotencyStore.GetAsync(userId, request.IdempotencyKey, scope, ct);
@@ -38,34 +38,56 @@ namespace Payments.Application.Payments.Commands
                 throw new AppException("order.forbidden", orderOwner.Error.Message, 403);
 
             if (order.Status == OrderStatus.Paid)
-                throw new AppException("order.not_payable", "Order already paid", 409);
+            {
+                if (payment.Status == PaymentStatus.Successful)
+                {
+                    var already = new ConfirmPaymentResultDto(payment.Id, payment.OrderId, "successful", "paid", payment.ProviderPaymentId, payment.FailureReason);
+                    await idempotencyStore.TrySaveAsync(userId, request.IdempotencyKey, scope, 200, JsonSerializer.Serialize(already), ct);
+                    return already;
+                }
+
+                if (payment.Status == PaymentStatus.Pending)
+                {
+                    var failedResult = payment.MarkFailed("already_paid_exists");
+                    if (!failedResult.IsSuccess)
+                        throw new AppException("payment.not_pending", failedResult.Error.Message, 409);
+                }
+
+                var conflictDto = new ConfirmPaymentResultDto(
+                    payment.Id,
+                    order.Id,
+                    payment.Status.ToString().ToLowerInvariant(),
+                    order.Status.ToString().ToLowerInvariant(),
+                    payment.ProviderPaymentId,
+                    payment.FailureReason ?? "already_paid_exists");
+
+                await idempotencyStore.TrySaveAsync(userId, request.IdempotencyKey, scope, 200, JsonSerializer.Serialize(conflictDto), ct);
+                return conflictDto;
+            }
 
             if (payment.Status == PaymentStatus.Successful)
             {
-                var already = new ConfirmPaymentResultDto(payment.Id,
-                                                          payment.OrderId,
-                                                          "successful",
-                                                          "paid",
-                                                          payment.ProviderPaymentId,
-                                                          payment.FailureReason);
-
-                await idempotencyStore.TrySaveAsync(userId,
-                                                    request.IdempotencyKey,
-                                                    scope,
-                                                    200,
-                                                    JsonSerializer.Serialize(already),
-                                                    ct);
+                var already = new ConfirmPaymentResultDto(payment.Id, payment.OrderId, "successful", "paid", payment.ProviderPaymentId, payment.FailureReason);
+                await idempotencyStore.TrySaveAsync(userId, request.IdempotencyKey, scope, 200, JsonSerializer.Serialize(already), ct);
                 return already;
             }
 
             if (payment.Status == PaymentStatus.Failed)
+            {
+                if (string.Equals(payment.FailureReason, "already_paid_exists", StringComparison.OrdinalIgnoreCase))
+                {
+                    var conflictDto = new ConfirmPaymentResultDto(payment.Id, order.Id, "failed", order.Status.ToString().ToLowerInvariant(), payment.ProviderPaymentId, payment.FailureReason);
+                    await idempotencyStore.TrySaveAsync(userId, request.IdempotencyKey, scope, 200, JsonSerializer.Serialize(conflictDto), ct);
+                    return conflictDto;
+                }
+
                 throw new AppException("payment.not_pending", "Only pending payment can be confirmed", 409);
+            }
 
             var providerResult = await provider.ConfirmAsync(payment.Id, payment.Amount, payment.Currency, ct);
 
             Result markResult;
             Result orderResult;
-
             if (providerResult.IsSuccess)
             {
                 markResult = payment.MarkSuccessful(providerResult.ProviderPaymentId);

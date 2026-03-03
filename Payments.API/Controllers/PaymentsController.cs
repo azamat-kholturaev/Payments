@@ -10,10 +10,10 @@ namespace Payments.API.Controllers
     [ApiController]
     [Route("api/payments")]
     [Authorize]
+    [EnableRateLimiting("token-user-queries")]
     public sealed class PaymentsController(IMediator mediator) : ControllerBase
     {
         [HttpPost("{paymentId:guid}/confirm")]
-        [EnableRateLimiting("payments-strict")]
         [ProducesResponseType(typeof(ConfirmPaymentResultDto), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
         public async Task<ActionResult<ConfirmPaymentResultDto>> Confirm(Guid paymentId,

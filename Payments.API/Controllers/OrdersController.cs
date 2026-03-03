@@ -12,12 +12,13 @@ using Payments.Contracts;
 namespace Payments.API.Controllers
 {
    
-    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
     public sealed class OrdersController(IMediator mediator) : ControllerBase
     {
         [HttpPost]
+        [EnableRateLimiting("token-user-commands")]
         [ProducesResponseType(typeof(CreateOrderResponse), StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
         public async Task<ActionResult<CreateOrderResponse>> Create([FromBody] CreateOrderRequest request, CancellationToken ct)
@@ -32,6 +33,7 @@ namespace Payments.API.Controllers
         }
 
         [HttpGet("{orderId:guid}")]
+        [EnableRateLimiting("token-user-queries")]
         [ProducesResponseType(typeof(OrderDto), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status403Forbidden)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
@@ -39,6 +41,7 @@ namespace Payments.API.Controllers
             => Ok(await mediator.Send(new GetOrderQuery(orderId), ct));
 
         [HttpPost("{orderId:guid}/payments")]
+        [EnableRateLimiting("token-user-commands")]
         [ProducesResponseType(typeof(PaymentDto), StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
         public async Task<ActionResult<PaymentDto>> CreatePayment(Guid orderId, [FromHeader(Name = "Idempotency-Key")] string idempotencyKey, CancellationToken ct)
@@ -51,6 +54,7 @@ namespace Payments.API.Controllers
         }
 
         [HttpGet("{orderId:guid}/payments")]
+        [EnableRateLimiting("token-user-queries")]
         [ProducesResponseType(typeof(IReadOnlyList<PaymentListItemDto>), StatusCodes.Status200OK)]
         public async Task<ActionResult<IReadOnlyList<PaymentListItemDto>>> ListPayments(Guid orderId, CancellationToken ct)
             => Ok(await mediator.Send(new ListPaymentsByOrderQuery(orderId), ct));

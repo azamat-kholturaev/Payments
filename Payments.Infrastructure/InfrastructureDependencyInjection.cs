@@ -17,6 +17,10 @@ namespace Payments.Infrastructure
 {
     public static class InfrastructureDependencyInjection
     {
+
+       
+
+
         public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration cfg)
         {
             services.AddDatabase(cfg)
@@ -25,7 +29,8 @@ namespace Payments.Infrastructure
                     .AddCaching()
                     .AddCatalogsAndStores()
                     .AddRepositories()
-                    .AddAuthentication(cfg);
+                    .AddAuthentication(cfg)
+                    .AddPaymentProvider();
 
             return services;
         }
@@ -107,6 +112,13 @@ namespace Payments.Infrastructure
                 IssuerSigningKey = new SymmetricSecurityKey(
                   Encoding.UTF8.GetBytes(jwtSettings.Secret)),
             });
+
+            return services;
+        }
+
+        public static IServiceCollection AddPaymentProvider(this IServiceCollection services)
+        {
+            services.AddScoped<IPaymentProviderClient, PaymentProviderClient>();
 
             return services;
         }
